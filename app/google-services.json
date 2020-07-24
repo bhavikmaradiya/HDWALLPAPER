@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "86647446352",
+    "firebase_url": "https://hdwallpaper-f4640.firebaseio.com",
+    "project_id": "hdwallpaper-f4640",
+    "storage_bucket": "hdwallpaper-f4640.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:86647446352:android:dee3f046aa1fb089a46a55",
+        "android_client_info": {
+          "package_name": "com.collabcreations.hdwallpaper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "86647446352-h0uhf0k7kdndlj15d787l3nrdi00gtar.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpJ6VirjKiDTrwjTkshs0849662RgCsLY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "86647446352-h0uhf0k7kdndlj15d787l3nrdi00gtar.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

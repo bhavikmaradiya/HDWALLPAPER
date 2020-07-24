@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">HDWALLPAPER</string>
+    <string name="navigation_drawer_open">open</string>
+    <string name="navigation_drawer_close">close</string>
+    <string name="splash_screen_caption">Stand up and stretch while this loads..</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="no_internet_message">No Internet Connection!</string>
+    <string name="exit_msg">Press back again to exit</string>
+</resources>
