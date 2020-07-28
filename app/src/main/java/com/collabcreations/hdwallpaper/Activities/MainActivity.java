@@ -26,7 +26,9 @@ import com.google.firebase.auth.FirebaseUser;
 
 import es.dmoral.toasty.Toasty;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class
+
+MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     Toolbar toolbar;
     NavigationView navigationView;
     DrawerLayout drawerLayout;

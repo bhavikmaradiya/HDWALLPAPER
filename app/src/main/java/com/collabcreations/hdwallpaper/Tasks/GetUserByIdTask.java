@@ -21,16 +21,17 @@ import static com.collabcreations.hdwallpaper.Modal.Common.saveUser;
 
 public class GetUserByIdTask extends AsyncTask<Void, Void, Void> {
     private FirebaseUser currentUser;
-    private String uId;
-    private DatabaseReference userRef = FirebaseDatabase.getInstance().getReference(Common.USER);
+    private String userId;
+    private DatabaseReference userRef;
     private OnUserFetchedListener onUserFetchedListener;
     private Context context;
 
-    public GetUserByIdTask(Context context, String uId, OnUserFetchedListener onUserFetchedListener) {
-        this.uId = uId;
+    public GetUserByIdTask(@NonNull Context context, @NonNull String userId, OnUserFetchedListener onUserFetchedListener) {
+        this.userId = userId;
         this.context = context;
         this.onUserFetchedListener = onUserFetchedListener;
         this.currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        this.userRef = FirebaseDatabase.getInstance().getReference(Common.USER);
     }
 
     @Override
@@ -40,14 +41,13 @@ public class GetUserByIdTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... voids) {
-
-        userRef.child(uId).addListenerForSingleValueEvent(new ValueEventListener() {
+        userRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     User user = dataSnapshot.getValue(User.class);
                     if (currentUser != null &&
-                            currentUser.getUid().equals(uId) && user != null) {
+                            currentUser.getUid().equals(userId) && user != null) {
                         saveUser(context, user);
                     }
                     if (onUserFetchedListener != null) {
@@ -55,7 +55,7 @@ public class GetUserByIdTask extends AsyncTask<Void, Void, Void> {
                     }
                 } else {
                     if (currentUser != null &&
-                            currentUser.getUid().equals(uId)) {
+                            currentUser.getUid().equals(userId)) {
                         User user = new User();
                         user.setEmailAddress(currentUser.getEmail());
                         if (currentUser.getPhotoUrl() != null) {
