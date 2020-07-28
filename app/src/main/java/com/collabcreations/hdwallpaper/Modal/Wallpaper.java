@@ -10,7 +10,7 @@ public class Wallpaper implements Serializable {
     private String categoryId;
     private List<Integer> colors;
     private String uploadedBy;
-    private long viewCount;
+    private long viewCount = 0;
     private long downloadCount;
     private List<String> tags;
 

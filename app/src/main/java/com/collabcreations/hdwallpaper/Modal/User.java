@@ -37,7 +37,7 @@ public class User implements Serializable {
         this.emailAddress = emailAddress;
     }
 
-    public String getUserName() {
+    public String getUsername() {
         return userName;
     }
 

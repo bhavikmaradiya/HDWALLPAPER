@@ -9,18 +9,17 @@ import com.collabcreations.hdwallpaper.Interface.OnUserFetchedListener;
 import com.collabcreations.hdwallpaper.Modal.Common;
 import com.collabcreations.hdwallpaper.Modal.ResponseCode;
 import com.collabcreations.hdwallpaper.Modal.User;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import static com.collabcreations.hdwallpaper.Modal.Common.getLoggedInUser;
 import static com.collabcreations.hdwallpaper.Modal.Common.saveUser;
 
 public class GetUserByIdTask extends AsyncTask<Void, Void, Void> {
-    private FirebaseUser currentUser;
+    private User currentUser;
     private String userId;
     private DatabaseReference userRef;
     private OnUserFetchedListener onUserFetchedListener;
@@ -30,14 +29,10 @@ public class GetUserByIdTask extends AsyncTask<Void, Void, Void> {
         this.userId = userId;
         this.context = context;
         this.onUserFetchedListener = onUserFetchedListener;
-        this.currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        this.userRef = FirebaseDatabase.getInstance().getReference(Common.USER);
+        this.currentUser = getLoggedInUser();
+        this.userRef = FirebaseDatabase.getInstance().getReference(Common.USER_REFERENCE);
     }
 
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-    }
 
     @Override
     protected Void doInBackground(Void... voids) {
@@ -47,7 +42,7 @@ public class GetUserByIdTask extends AsyncTask<Void, Void, Void> {
                 if (dataSnapshot.exists()) {
                     User user = dataSnapshot.getValue(User.class);
                     if (currentUser != null &&
-                            currentUser.getUid().equals(userId) && user != null) {
+                            currentUser.getuId().equals(userId) && user != null) {
                         saveUser(context, user);
                     }
                     if (onUserFetchedListener != null) {
@@ -55,14 +50,14 @@ public class GetUserByIdTask extends AsyncTask<Void, Void, Void> {
                     }
                 } else {
                     if (currentUser != null &&
-                            currentUser.getUid().equals(userId)) {
+                            currentUser.getuId().equals(userId)) {
                         User user = new User();
-                        user.setEmailAddress(currentUser.getEmail());
-                        if (currentUser.getPhotoUrl() != null) {
-                            user.setProfileImage(currentUser.getPhotoUrl().toString());
+                        user.setEmailAddress(currentUser.getEmailAddress());
+                        if (currentUser.getProfileImage() != null) {
+                            user.setProfileImage(currentUser.getProfileImage());
                         }
-                        user.setUserName(currentUser.getDisplayName());
-                        user.setuId(currentUser.getUid());
+                        user.setUserName(currentUser.getUsername());
+                        user.setuId(currentUser.getuId());
                         saveUser(context, user);
                         userRef.child(user.getuId())
                                 .setValue(user);
@@ -86,10 +81,6 @@ public class GetUserByIdTask extends AsyncTask<Void, Void, Void> {
         return null;
     }
 
-    @Override
-    protected void onPostExecute(Void voids) {
-        super.onPostExecute(voids);
-    }
 
 
 }

@@ -25,7 +25,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -49,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         btnSignIn = findViewById(R.id.btnSignIn);
         auth = FirebaseAuth.getInstance();
-        userRef = FirebaseDatabase.getInstance().getReference(Common.USER);
+        userRef = FirebaseDatabase.getInstance().getReference(Common.USER_REFERENCE);
 
         dialog = new ProgressDialog(LoginActivity.this);
         dialog.setCancelable(false);
@@ -106,16 +105,8 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            FirebaseUser firebaseUser = auth.getCurrentUser();
-                            User user = new User();
-                            user.setEmailAddress(firebaseUser.getEmail());
-                            if (firebaseUser.getPhotoUrl() != null) {
-                                user.setProfileImage(firebaseUser.getPhotoUrl().toString());
-                            }
-                            user.setUserName(firebaseUser.getDisplayName());
-                            user.setuId(firebaseUser.getUid());
                             mGoogleSignInClient.signOut();
-                            store(user);
+                            store(Common.firebaseUserToUser());
                         } else {
                             if (dialog.isShowing()) {
                                 dialog.cancel();
