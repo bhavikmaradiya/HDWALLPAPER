@@ -34,6 +34,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import es.dmoral.toasty.Toasty;
 
+import static com.collabcreations.hdwallpaper.Modal.Common.saveUser;
+
 public class LoginActivity extends AppCompatActivity {
     private static final int GOOGLE_SIGNIN_REQUESTCODE = 525;
     SignInButton btnSignIn;
@@ -61,15 +63,12 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-        btnSignIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Common.isNetworkConnected(getApplicationContext())) {
-                    Intent intent = mGoogleSignInClient.getSignInIntent();
-                    startActivityForResult(intent, GOOGLE_SIGNIN_REQUESTCODE);
-                } else {
-                    Toasty.error(getApplicationContext(), R.string.no_internet_message, Toasty.LENGTH_LONG, false).show();
-                }
+        btnSignIn.setOnClickListener(v -> {
+            if (Common.isNetworkConnected(getApplicationContext())) {
+                Intent intent = mGoogleSignInClient.getSignInIntent();
+                startActivityForResult(intent, GOOGLE_SIGNIN_REQUESTCODE);
+            } else {
+                Toasty.error(getApplicationContext(), R.string.no_internet_message, Toasty.LENGTH_LONG, false).show();
             }
         });
     }
@@ -101,21 +100,18 @@ public class LoginActivity extends AppCompatActivity {
         }
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         auth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            mGoogleSignInClient.signOut();
-                            store(Common.firebaseUserToUser());
-                        } else {
-                            if (dialog.isShowing()) {
-                                dialog.cancel();
-                            }
-                            Toasty.error(getApplicationContext(), task.getException().getMessage(), Toasty.LENGTH_LONG, false).show();
-                            // If sign in fails, display a message to the user.
-                            Log.w("fail", "signInWithCredential:failure", task.getException());
-
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        mGoogleSignInClient.signOut();
+                        store(Common.firebaseUserToUser());
+                    } else {
+                        if (dialog.isShowing()) {
+                            dialog.cancel();
                         }
+                        Toasty.error(getApplicationContext(), task.getException().getMessage(), Toasty.LENGTH_LONG, false).show();
+                        // If sign in fails, display a message to the user.
+                        Log.w("fail", "signInWithCredential:failure", task.getException());
+
                     }
                 });
     }
@@ -126,27 +122,23 @@ public class LoginActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChild(user.getuId())) {
                     userRef.child(user.getuId())
-                            .setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            if (dialog.isShowing()) {
-                                dialog.cancel();
-                            }
-                            startActivity(intent);
-                            finish();
+                            .setValue(user).addOnSuccessListener(aVoid -> {
+                                saveUser(getApplicationContext(), user);
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                if (dialog.isShowing()) {
+                                    dialog.cancel();
+                                }
+                                startActivity(intent);
+                                finish();
+                            }).addOnFailureListener(e -> {
+                        if (dialog.isShowing()) {
+                            dialog.cancel();
                         }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            if (dialog.isShowing()) {
-                                dialog.cancel();
-                            }
-                            Toasty.error(getApplicationContext(), e.getMessage(), Toasty.LENGTH_SHORT, false).show();
-                        }
+                        Toasty.error(getApplicationContext(), e.getMessage(), Toasty.LENGTH_SHORT, false).show();
                     });
                 } else {
+                    saveUser(getApplicationContext(), user);
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     if (dialog.isShowing()) {

@@ -21,6 +21,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
 
 }
 
@@ -45,5 +49,6 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
     implementation 'com.google.cloud:google-cloud-vision:1.99.3'
     implementation 'com.flaviofaria:kenburnsview:1.0.7'
-
+    implementation 'androidx.palette:palette:1.0.0'
+    implementation 'com.squareup.picasso:picasso:2.71828'
 }

@@ -1,8 +1,7 @@
 package com.collabcreations.hdwallpaper.Interface;
 
-public interface OnWallpaperUploadCompleteListener {
+public interface WallpaperUploadListener {
     void onUploadComplete(boolean isSuccess);
-
     void onFail();
 
     void onAdultContentFound();

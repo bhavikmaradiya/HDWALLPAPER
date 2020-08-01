@@ -15,7 +15,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.collabcreations.hdwallpaper.Interface.OnUserFetchedListener;
 import com.collabcreations.hdwallpaper.Modal.Common;
 import com.collabcreations.hdwallpaper.Modal.User;
 import com.collabcreations.hdwallpaper.R;
@@ -40,6 +39,7 @@ MainActivity extends AppCompatActivity implements NavigationView.OnNavigationIte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        currentUser = Common.getUser(getApplicationContext());
         initViews();
     }
 
@@ -67,12 +67,9 @@ MainActivity extends AppCompatActivity implements NavigationView.OnNavigationIte
             startActivity(intent);
             finish();
         } else {
-            GetUserByIdTask task = new GetUserByIdTask(getApplicationContext(), user.getUid(), new OnUserFetchedListener() {
-                @Override
-                public void onUserFetchComplete(boolean isSuccessful, User user, int responseCode) {
-                    if (isSuccessful) {
-                        currentUser = user;
-                    }
+            GetUserByIdTask task = new GetUserByIdTask(getApplicationContext(), user.getUid(), (isSuccessful, user1, responseCode) -> {
+                if (isSuccessful) {
+                    currentUser = user1;
                 }
             });
             if (Common.isNetworkConnected(getApplicationContext())) {

@@ -12,13 +12,10 @@ public class Common {
     public static final String WALLPAPER_REFERENCE = "wallpapers";
     public static final String ORIGINAL_IMAGE = "original";
     public static final String THUMB_IMAGE = "thumbnail";
+    public static final String COLOR_REFERENCE = "colors";
 
     public static void saveUser(Context context, User user) {
-        context.getSharedPreferences(USER_REFERENCE, Context.MODE_PRIVATE).edit().putString(USER_REFERENCE, user.toJson()).apply();
-    }
-
-    public static User getLoggedInUser() {
-        return firebaseUserToUser();
+        context.getSharedPreferences(firebaseUserToUser().getuId(), Context.MODE_PRIVATE).edit().putString(USER_REFERENCE, user.toJson()).apply();
     }
 
     public static User firebaseUserToUser() {
@@ -36,18 +33,19 @@ public class Common {
         return user;
     }
 
-    public static boolean isLoggedIn() {
+    private static boolean isLoggedIn() {
         return FirebaseAuth.getInstance().getCurrentUser() != null;
     }
 
     public static User getUser(Context context) {
-        String user = context.getSharedPreferences(USER_REFERENCE, Context.MODE_PRIVATE).getString(USER_REFERENCE, null);
-        if (user != null) {
+        String user = context.getSharedPreferences(firebaseUserToUser().getuId(), Context.MODE_PRIVATE).getString(USER_REFERENCE, null);
+        if (isLoggedIn() && user != null) {
             return new Gson().fromJson(user, User.class);
         } else {
             return null;
         }
     }
+
 
     public static boolean isNetworkConnected(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

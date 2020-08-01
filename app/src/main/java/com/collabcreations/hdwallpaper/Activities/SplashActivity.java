@@ -6,13 +6,13 @@ import android.os.Handler;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.collabcreations.hdwallpaper.Interface.OnUserFetchedListener;
+import com.collabcreations.hdwallpaper.Interface.UserFetchListener;
 import com.collabcreations.hdwallpaper.Modal.User;
 import com.collabcreations.hdwallpaper.R;
 import com.collabcreations.hdwallpaper.Tasks.GetUserByIdTask;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class SplashActivity extends AppCompatActivity implements OnUserFetchedListener {
+public class SplashActivity extends AppCompatActivity implements UserFetchListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -46,11 +46,8 @@ public class User implements Serializable {
     }
 
 
-    public String toJson() {
+    String toJson() {
         return new Gson().toJson(this, User.class);
     }
 
-    public User toUser() {
-        return new Gson().fromJson(this.toJson(), User.class);
-    }
 }

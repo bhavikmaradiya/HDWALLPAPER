@@ -1,36 +1,49 @@
 package com.collabcreations.hdwallpaper.Modal;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 
 public class Wallpaper implements Serializable {
     private String wallpaperId;
     private String originalImage;
     private String thumbnail;
     private String categoryId;
-    private List<Integer> colors;
-    private String uploadedBy;
+    private List<Color> colors;
+    private String uploadedBy = Common.firebaseUserToUser().getuId();
     private long viewCount = 0;
-    private long downloadCount;
-    private List<String> tags;
+    private long downloadCount = 0;
+    private long timeInMillis;
+    private List<Tag> tags;
 
     public Wallpaper() {
-    }
-
-    public Wallpaper(String wallpaperId) {
-        this.wallpaperId = wallpaperId;
+        wallpaperId = generateWallpaperId();
     }
 
     public String getWallpaperId() {
+        if (wallpaperId == null) {
+            wallpaperId = generateWallpaperId();
+        }
         return wallpaperId;
     }
 
-    public List<String> getTags() {
+    public List<Tag> getTags() {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
+    public void setTags(List<Tag> tags) {
         this.tags = tags;
+    }
+
+    public long getTimeInMillis() {
+        return timeInMillis;
+    }
+
+    public void setTimeInMillis(long timeInMillis) {
+        this.timeInMillis = timeInMillis;
     }
 
     public void setWallpaperId(String wallpaperId) {
@@ -61,11 +74,11 @@ public class Wallpaper implements Serializable {
         this.categoryId = categoryId;
     }
 
-    public List<Integer> getColors() {
+    public List<Color> getColors() {
         return colors;
     }
 
-    public void setColors(List<Integer> colors) {
+    public void setColors(List<Color> colors) {
         this.colors = colors;
     }
 
@@ -73,23 +86,20 @@ public class Wallpaper implements Serializable {
         return uploadedBy;
     }
 
-    public void setUploadedBy(String uploadedBy) {
-        this.uploadedBy = uploadedBy;
-    }
-
     public long getViewCount() {
         return viewCount;
-    }
-
-    public void setViewCount(long viewCount) {
-        this.viewCount = viewCount;
     }
 
     public long getDownloadCount() {
         return downloadCount;
     }
 
-    public void setDownloadCount(long downloadCount) {
-        this.downloadCount = downloadCount;
+    private String generateWallpaperId() {
+        return "wall" + UUID.randomUUID().toString().substring(0, 3) + Common.firebaseUserToUser().getuId().substring(0, 5)+ Calendar.getInstance().getTime().toString().substring(0, 3);
     }
+
+    public String toJson() {
+        return new Gson().toJson(this, Wallpaper.class);
+    }
+
 }

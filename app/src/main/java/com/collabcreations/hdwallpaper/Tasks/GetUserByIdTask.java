@@ -5,7 +5,7 @@ import android.os.AsyncTask;
 
 import androidx.annotation.NonNull;
 
-import com.collabcreations.hdwallpaper.Interface.OnUserFetchedListener;
+import com.collabcreations.hdwallpaper.Interface.UserFetchListener;
 import com.collabcreations.hdwallpaper.Modal.Common;
 import com.collabcreations.hdwallpaper.Modal.ResponseCode;
 import com.collabcreations.hdwallpaper.Modal.User;
@@ -15,21 +15,21 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import static com.collabcreations.hdwallpaper.Modal.Common.getLoggedInUser;
+import static com.collabcreations.hdwallpaper.Modal.Common.firebaseUserToUser;
 import static com.collabcreations.hdwallpaper.Modal.Common.saveUser;
 
 public class GetUserByIdTask extends AsyncTask<Void, Void, Void> {
     private User currentUser;
     private String userId;
     private DatabaseReference userRef;
-    private OnUserFetchedListener onUserFetchedListener;
+    private UserFetchListener userFetchListener;
     private Context context;
 
-    public GetUserByIdTask(@NonNull Context context, @NonNull String userId, OnUserFetchedListener onUserFetchedListener) {
+    public GetUserByIdTask(@NonNull Context context, @NonNull String userId, UserFetchListener userFetchListener) {
         this.userId = userId;
         this.context = context;
-        this.onUserFetchedListener = onUserFetchedListener;
-        this.currentUser = getLoggedInUser();
+        this.userFetchListener = userFetchListener;
+        this.currentUser = firebaseUserToUser();
         this.userRef = FirebaseDatabase.getInstance().getReference(Common.USER_REFERENCE);
     }
 
@@ -45,26 +45,20 @@ public class GetUserByIdTask extends AsyncTask<Void, Void, Void> {
                             currentUser.getuId().equals(userId) && user != null) {
                         saveUser(context, user);
                     }
-                    if (onUserFetchedListener != null) {
-                        onUserFetchedListener.onUserFetchComplete(true, user, ResponseCode.SUCCESS);
+                    if (userFetchListener != null) {
+                        userFetchListener.onUserFetchComplete(true, user, ResponseCode.SUCCESS);
                     }
                 } else {
                     if (currentUser != null &&
                             currentUser.getuId().equals(userId)) {
-                        User user = new User();
-                        user.setEmailAddress(currentUser.getEmailAddress());
-                        if (currentUser.getProfileImage() != null) {
-                            user.setProfileImage(currentUser.getProfileImage());
-                        }
-                        user.setUserName(currentUser.getUsername());
-                        user.setuId(currentUser.getuId());
+                        User user = firebaseUserToUser();
                         saveUser(context, user);
                         userRef.child(user.getuId())
                                 .setValue(user);
 
                     }
-                    if (onUserFetchedListener != null) {
-                        onUserFetchedListener.onUserFetchComplete(false, null, ResponseCode.NO_USER_FOUND);
+                    if (userFetchListener != null) {
+                        userFetchListener.onUserFetchComplete(false, null, ResponseCode.NO_USER_FOUND);
                     }
                 }
 
@@ -73,14 +67,13 @@ public class GetUserByIdTask extends AsyncTask<Void, Void, Void> {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                if (onUserFetchedListener != null) {
-                    onUserFetchedListener.onUserFetchComplete(false, null, ResponseCode.DATABASE_ERROR);
+                if (userFetchListener != null) {
+                    userFetchListener.onUserFetchComplete(false, null, ResponseCode.DATABASE_ERROR);
                 }
             }
         });
         return null;
     }
-
 
 
 }
