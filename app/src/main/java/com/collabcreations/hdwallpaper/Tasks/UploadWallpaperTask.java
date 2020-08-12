@@ -13,6 +13,7 @@ import androidx.annotation.RequiresApi;
 import androidx.palette.graphics.Palette;
 
 import com.collabcreations.hdwallpaper.Interface.WallpaperUploadListener;
+import com.collabcreations.hdwallpaper.Modal.Category;
 import com.collabcreations.hdwallpaper.Modal.Color;
 import com.collabcreations.hdwallpaper.Modal.Common;
 import com.collabcreations.hdwallpaper.Modal.Wallpaper;
@@ -49,15 +50,18 @@ public class UploadWallpaperTask extends AsyncTask<Void, Void, Void> {
     private StorageReference originalImageRef, thumbImageRef;
     private Uri file;
     private UploadTask thumbTask, imageTask;
+    List<Color> colors;
     private WallpaperUploadListener wallpaperUploadListener;
 
-    public UploadWallpaperTask(Context context, Wallpaper wallpaper, Uri uri, WallpaperUploadListener wallpaperUploadListener) {
+    public UploadWallpaperTask(Context context, Category category, Uri uri, WallpaperUploadListener wallpaperUploadListener) {
         this.context = context;
         this.file = uri;
-        this.wallpaper = wallpaper;
+        this.wallpaper = new Wallpaper();
+        this.wallpaper.setCategoryId(category.getCategoryId());
+        colors = new ArrayList<>();
         this.wallpaperRef = FirebaseDatabase.getInstance().getReference(Common.WALLPAPER_REFERENCE).child(this.wallpaper.getWallpaperId());
-        this.originalImageRef = FirebaseStorage.getInstance().getReference(Common.WALLPAPER_REFERENCE).child(Common.ORIGINAL_IMAGE).child(this.wallpaper.getWallpaperId() + "." + Common.getFileExtension());
-        this.thumbImageRef = FirebaseStorage.getInstance().getReference(Common.WALLPAPER_REFERENCE).child(Common.THUMB_IMAGE).child(this.wallpaper.getWallpaperId() + "." + Common.getFileExtension());
+        this.originalImageRef = FirebaseStorage.getInstance().getReference(Common.WALLPAPER_REFERENCE).child(Common.ORIGINAL_IMAGE).child(this.wallpaper.getWallpaperId());
+        this.thumbImageRef = FirebaseStorage.getInstance().getReference(Common.WALLPAPER_REFERENCE).child(Common.THUMB_IMAGE).child(this.wallpaper.getWallpaperId());
         this.wallpaperUploadListener = wallpaperUploadListener;
     }
 
@@ -129,10 +133,9 @@ public class UploadWallpaperTask extends AsyncTask<Void, Void, Void> {
         try {
             bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), file);
             if (bitmap == null) loadBitmap();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
-            byte[] data = baos.toByteArray();
-            thumbTask = thumbImageRef.putBytes(data);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 25, outputStream);
+            thumbTask = thumbImageRef.putBytes(outputStream.toByteArray());
             thumbTask.addOnCompleteListener(task -> {
                 if (wallpaperUploadListener != null && !task.isSuccessful()) {
                     wallpaperUploadListener.onFail();
@@ -152,12 +155,13 @@ public class UploadWallpaperTask extends AsyncTask<Void, Void, Void> {
 
                         if (imagetask.isSuccessful()) {
                             originalImageRef.getDownloadUrl().addOnSuccessListener(uri -> wallpaper.setOriginalImage(uri.toString()));
-                            getColors();
+                            generateColors();
                             wallpaper.setTimeInMillis(System.currentTimeMillis());
                             wallpaperRef.setValue(wallpaper).addOnCompleteListener(wallpaperTask -> {
-                                if (wallpaperUploadListener != null) {
+                                storeColors();
+                                if (wallpaperUploadListener != null)
                                     wallpaperUploadListener.onUploadComplete(wallpaperTask.isSuccessful());
-                                }
+
                             });
                         }
                     });
@@ -170,12 +174,12 @@ public class UploadWallpaperTask extends AsyncTask<Void, Void, Void> {
         return null;
     }
 
-    private void getColors() {
-        if (bitmap == null) loadBitmap();
+    private void generateColors() {
+        colors.clear();
+        loadBitmap();
         Palette.from(bitmap)
                 .generate(palette -> {
                     int defaultValue = 0x000000;
-                    List<Color> colors = new ArrayList<>();
                     colors.add(new Color(String.valueOf(palette.getVibrantColor(defaultValue)), palette.getVibrantColor(defaultValue)));
                     colors.add(new Color(String.valueOf(palette.getDarkVibrantColor(defaultValue)), palette.getDarkVibrantColor(defaultValue)));
                     colors.add(new Color(String.valueOf(palette.getLightVibrantColor(defaultValue)), palette.getLightVibrantColor(defaultValue)));
@@ -183,32 +187,25 @@ public class UploadWallpaperTask extends AsyncTask<Void, Void, Void> {
                     colors.add(new Color(String.valueOf(palette.getDarkMutedColor(defaultValue)), palette.getDarkMutedColor(defaultValue)));
                     colors.add(new Color(String.valueOf(palette.getLightMutedColor(defaultValue)), palette.getLightMutedColor(defaultValue)));
                     wallpaper.setColors(colors);
-
-                    FirebaseDatabase.getInstance().getReference(Common.COLOR_REFERENCE)
-                            .addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    for (Color color : colors) {
-                                        if (!snapshot.hasChild(color.getStringValue())) {
-                                            FirebaseDatabase.getInstance().getReference(Common.COLOR_REFERENCE)
-                                                    .child(color.getStringValue()).setValue(color);
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                }
-                            });
-
                 });
-
     }
 
+    private void storeColors() {
+        FirebaseDatabase.getInstance().getReference(Common.COLOR_REFERENCE)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (Color color : colors) {
+                            if (!snapshot.hasChild(color.getStringValue())) {
+                                FirebaseDatabase.getInstance().getReference(Common.COLOR_REFERENCE)
+                                        .child(color.getStringValue()).setValue(color);
+                            }
+                        }
+                    }
 
-    @Override
-    protected void onPostExecute(Void aVoid) {
-        super.onPostExecute(aVoid);
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                    }
+                });
     }
 }

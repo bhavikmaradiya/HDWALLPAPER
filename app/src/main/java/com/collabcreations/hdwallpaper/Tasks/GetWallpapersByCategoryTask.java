@@ -29,14 +29,17 @@ public class GetWallpapersByCategoryTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... voids) {
-        FirebaseDatabase.getInstance().getReference(Common.WALLPAPER_REFERENCE).addListenerForSingleValueEvent(new ValueEventListener() {
+        FirebaseDatabase.getInstance().getReference(Common.WALLPAPER_REFERENCE).orderByChild("categoryId").equalTo(category.getCategoryId()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    Wallpaper wallpaper = dataSnapshot.getValue(Wallpaper.class);
-                    if (wallpaper.getCategoryId().equals(category.getCategoryId())) {
-                        wallpapers.add(wallpaper);
-                        if (listener != null) listener.onNewWallpaperFound(wallpaper);
+                wallpapers.clear();
+                if (snapshot.hasChildren()) {
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                        Wallpaper wallpaper = dataSnapshot.getValue(Wallpaper.class);
+                        if (wallpaper.getCategoryId().equals(category.getCategoryId())) {
+                            wallpapers.add(wallpaper);
+                            if (listener != null) listener.onNewWallpaperFound(wallpaper);
+                        }
                     }
                 }
                 if (listener != null) listener.onWallpaperResult(wallpapers);

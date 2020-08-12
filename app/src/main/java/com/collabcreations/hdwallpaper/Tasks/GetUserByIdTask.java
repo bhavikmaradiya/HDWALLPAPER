@@ -41,16 +41,14 @@ public class GetUserByIdTask extends AsyncTask<Void, Void, Void> {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     User user = dataSnapshot.getValue(User.class);
-                    if (currentUser != null &&
-                            currentUser.getuId().equals(userId) && user != null) {
+                    if (currentUser != null && currentUser.getuId().equals(userId) && user != null) {
                         saveUser(context, user);
                     }
                     if (userFetchListener != null) {
                         userFetchListener.onUserFetchComplete(true, user, ResponseCode.SUCCESS);
                     }
                 } else {
-                    if (currentUser != null &&
-                            currentUser.getuId().equals(userId)) {
+                    if (currentUser != null && currentUser.getuId().equals(userId)) {
                         User user = firebaseUserToUser();
                         saveUser(context, user);
                         userRef.child(user.getuId())

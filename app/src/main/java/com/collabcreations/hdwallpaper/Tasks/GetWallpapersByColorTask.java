@@ -35,6 +35,7 @@ public class GetWallpapersByColorTask extends AsyncTask<Void, Void, Void> {
         wallpaperRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                wallpapers.clear();
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     Wallpaper wallpaper = dataSnapshot.getValue(Wallpaper.class);
                     if (wallpaper.getColors() != null) {
